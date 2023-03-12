@@ -148,7 +148,7 @@ class FlairBot:
             print (f'{submission.title} collected')
 
     # is a background task
-    async def no_sauce_hook(self, action:Callable, after=1200, frequency=30, spoiler=True):
+    async def no_sauce_hook(self, action:Callable, after=1200, frequency=60, spoiler=True):
         cursor = None
         try:
             cursor = self.conn.cursor()
