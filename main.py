@@ -4,7 +4,6 @@ import asyncio
 
 SUBREDDIT = 'eppistoolbox'
 ROBO = 'roboragi'
-REDDIT =  asyncpraw.Reddit('iiep')
 
 database_scheme = '''
 CREATE TABLE posts IF NOT EXISTS (
@@ -32,10 +31,11 @@ def has_op_sauce(i):
     pass
 
 async def get_robo_comments():
+    REDDIT =  asyncpraw.Reddit('iiep')
     redditor = await REDDIT.redditor(ROBO)
     async for i in redditor.stream.comments():
         # await sauce_it(i)
-        print(i)
+        print(i.subreddit)
 
 async def sauce_it(i):
     await save_sauce(i)
@@ -53,9 +53,10 @@ async def save_sauce(i):
     pass
 
 async def save_post(i):
-    pass
+    print(i)
 
 async def get_posts():
+    REDDIT =  asyncpraw.Reddit('iiep')
     sub = await REDDIT.subreddit(SUBREDDIT)
     async for i in sub.stream.submissions():
         await save_post(i)
