@@ -185,7 +185,7 @@ class FlairBot:
         await comment.mod.distinguish(sticky=True)
 
     async def remove_post_for_no_sauce(self, post_id):
-        await self.remove_post(post_id, flair_template_id='094ce764-898a-11e9-b1bf-0e66eeae092c')
+        await self.remove_post(post_id, flair_template_id='094ce764-898a-11e9-b1bf-0e66eeae092c', text='no sauce :(')
 
     async def remove_post_for_spoiler(self, post_id, title):
         if not re.search(r'.*\[.*\].*', title):
