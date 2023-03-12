@@ -1,0 +1,4 @@
+__pycache__
+praw.ini
+venv
+*token*
