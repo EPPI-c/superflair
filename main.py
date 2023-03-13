@@ -81,6 +81,7 @@ class Flairer:
         self.sauces = await self.parse_robo_comment()
         query = 'insert or ignore into comments (comment_id, parent_id, op, post_id, created_utc) values(?, ?, ?, ? ,?)'
         self.conn.execute(query, (self.comment.id, self.comment.parent_id, self.parent_comment.is_submitter, self.comment.submission.id, self.comment.created_utc))
+        self.conn.commit()
        # query = 'insert or ignore into sauces(comment_id, sauce) values'
        # query = f'{query}{" ".join(("(?, ?)" for _ in self.sauces))}'
        # print(f'query: {query}')
@@ -131,12 +132,14 @@ class FlairBot:
                 );
         ''')
         self.conn = sqlite3.connect(db)
+        self.conn.execute('pragma journal_mode=wal')
         self.reddit = asyncpraw.Reddit('iiep')
         self.subreddit = 'eppistoolbox'
         self.robo = 'roboragi'
         self.flairer = Flairer(self.conn, self.reddit, self.subreddit, self.robo)
         for query in database_scheme:
             self.conn.execute(query)
+        self.conn.commit()
 
 
     @is_background_task
@@ -151,8 +154,8 @@ class FlairBot:
     async def no_sauce_hook(self, action:Callable, after=1200, frequency=60, spoiler=True):
         cursor = None
         try:
-            cursor = self.conn.cursor()
             while True:
+                cursor = self.conn.cursor()
                 print('no_sauce_hook')
                 await asyncio.sleep(frequency)
                 query = 'SELECT post_id, title, spoiler FROM posts WHERE created_utc < ? AND verified=0' 
@@ -169,11 +172,14 @@ class FlairBot:
                 placeholder = placeholder.removesuffix(',')
                 query = f'UPDATE posts SET verified=1 WHERE post_id IN ({placeholder})'
                 cursor.execute(query, (*ids,))
+                self.conn.commit()
+                cursor.close()
         except asyncio.CancelledError as e:
             print(e)
         except Exception as e:
             print(e)
         finally:
+            self.conn.commit()
             if cursor: cursor.close()
 
     async def comment_no_sauce(self, post_id):
@@ -200,6 +206,7 @@ class FlairBot:
         query = 'insert or ignore into posts (post_id, created_utc, spoiler, title) values(?, ?, ?, ?)'
         values = (post.id, post.created_utc, post.spoiler, post.title)
         self.conn.execute(query, values)
+        self.conn.commit()
 
 
 async def main():
