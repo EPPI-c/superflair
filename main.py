@@ -185,7 +185,7 @@ class FlairBot:
     async def comment_no_sauce(self, post_id):
         print(f'commented on {post_id}')
         post = await self.reddit.submission(post_id)
-        comment = await post.reply("Hi there please consider sourcing your post with \"{anime name}\"")
+        comment = await post.reply("We have a feature to place the source as a flair by using the u/Roboragi, just comment the title of the anime like this {title of the anime}. To find out more about this head over to [announcement post](https://redd.it/11tt7fg). ")
         if not comment: 
             return False
         await comment.mod.distinguish(sticky=True)
