@@ -46,7 +46,7 @@ class Flairer:
         await s.load()
         if self.comment.subreddit != self.subreddit or s.removed:
             return False
-        print(f'----------------------------\n{self.comment.author}-{self.comment.id}-{self.comment.created_utc}\n{self.comment.body}\n\n')
+        print(f'{self.comment.author}-{self.comment.id}-{self.comment.created_utc}\n')
         await self.sauce_it()
 
     # async def from_sub_comments(self) -> bool|None:
@@ -81,6 +81,8 @@ class Flairer:
         self.sauces = await self.parse_robo_comment()
         query = 'insert or ignore into comments (comment_id, parent_id, op, post_id, created_utc) values(?, ?, ?, ? ,?)'
         self.conn.execute(query, (self.comment.id, self.comment.parent_id, self.parent_comment.is_submitter, self.comment.submission.id, self.comment.created_utc))
+        query = 'UPDATE posts SET verified=1 WHERE post_id = ?'
+        self.conn.execute(query, (self.comment.submission.id))
         self.conn.commit()
        # query = 'insert or ignore into sauces(comment_id, sauce) values'
        # query = f'{query}{" ".join(("(?, ?)" for _ in self.sauces))}'
@@ -185,7 +187,7 @@ class FlairBot:
     async def comment_no_sauce(self, post_id):
         print(f'commented on {post_id}')
         post = await self.reddit.submission(post_id)
-        comment = await post.reply("We have a feature to place the source as a flair by using the u/Roboragi, just comment the title of the anime like this {title of the anime}. To find out more about this head over to [announcement post](https://redd.it/11tt7fg). ")
+        comment = await post.reply("You can put a source on the post flair by using the u/Roboragi, just comment the title of the anime like this {title of the anime}.\n\n[^more ^information](https://redd.it/11tt7fg)")
         if not comment: 
             return False
         await comment.mod.distinguish(sticky=True)
