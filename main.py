@@ -82,7 +82,7 @@ class Flairer:
         query = 'insert or ignore into comments (comment_id, parent_id, op, post_id, created_utc) values(?, ?, ?, ? ,?)'
         self.conn.execute(query, (self.comment.id, self.comment.parent_id, self.parent_comment.is_submitter, self.comment.submission.id, self.comment.created_utc))
         query = 'UPDATE posts SET verified=1 WHERE post_id = ?'
-        self.conn.execute(query, (self.comment.submission.id))
+        self.conn.execute(query, (self.comment.submission.id,))
         self.conn.commit()
        # query = 'insert or ignore into sauces(comment_id, sauce) values'
        # query = f'{query}{" ".join(("(?, ?)" for _ in self.sauces))}'
