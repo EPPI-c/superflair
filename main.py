@@ -1,3 +1,4 @@
+import os
 from collections.abc import Callable
 import asyncpraw
 import sqlite3
@@ -104,7 +105,7 @@ class Flairer:
         return flair[:-1]
 
 class FlairBot:
-    def __init__(self, db:str = '../flair_volume/database') -> None:
+    def __init__(self, db:str = ':memory:') -> None:
         database_scheme = ('''
         create table if not exists posts (
                 post_id text not null,
@@ -135,9 +136,15 @@ class FlairBot:
         ''')
         self.conn = sqlite3.connect(db)
         self.conn.execute('pragma journal_mode=wal')
-        self.reddit = asyncpraw.Reddit('iiep')
-        self.subreddit = 'eppistoolbox'
-        self.robo = 'roboragi'
+        self.reddit = asyncpraw.Reddit(
+            client_id=os.environ["REDDIT_CLIENT_ID"],
+            client_secret=os.environ["REDDIT_CLIENT_SECRET"],
+            password=os.environ["REDDIT_PASSWORD"],
+            username=os.environ["REDDIT_USERNAME"],
+            user_agent=os.environ["REDDIT_AGENT"],
+        )
+        self.subreddit = os.environ['SUBREDDIT']
+        self.robo = os.environ['ROBO']
         self.flairer = Flairer(self.conn, self.reddit, self.subreddit, self.robo)
         for query in database_scheme:
             self.conn.execute(query)
